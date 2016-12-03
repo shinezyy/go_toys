@@ -58,7 +58,7 @@ func st_qsort(a []int) []int {
 
 func qsort(a []int, ch chan bool) {
 	if len(a) < 100000 {
-		st_qsort(a)
+        st_qsort(a)
 		ch <- true
 		return
 	}
@@ -105,7 +105,9 @@ func main() {
 
     sum := 0
 
-    for loop := 0; loop < 10; loop++ {
+    numLoop :=2
+
+    for loop := 0; loop < numLoop; loop++ {
 
         for i := range a{
             a[i] = r1.Intn(100000000)
@@ -130,5 +132,5 @@ func main() {
         }
     }
 
-    fmt.Println(sum/10)
+    fmt.Println(sum/numLoop)
 }
