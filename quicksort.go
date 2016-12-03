@@ -3,6 +3,7 @@ package main
 import "time"
 import "math/rand"
 import "fmt"
+import "sort"
 import "runtime"
 
 
@@ -97,7 +98,7 @@ func qsort(a []int, ch chan bool) {
 
 
 func main() {
-    runtime.GOMAXPROCS(16)
+    runtime.GOMAXPROCS(8)
 
 	s1 := rand.NewSource(time.Now().UnixNano())
 	r1 := rand.New(s1)
@@ -123,12 +124,8 @@ func main() {
             sum += end - start
         }
 
-        l := len(a) - 1
-        for i := 0; i < l; i++{
-            if a[i] > a[i+1] {
-                fmt.Println("Wrong !")
-                break
-            }
+        if (!sort.IntsAreSorted(a)) {
+            fmt.Println("Wrong !")
         }
     }
 
