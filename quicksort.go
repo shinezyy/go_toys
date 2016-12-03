@@ -91,10 +91,14 @@ func main() {
 	}
 
 	start := int(time.Now().UnixNano())
-	st_qsort(a)
+    c := make(chan bool)
+	go qsort(a, c)
+    b := <-c
 	end := int(time.Now().UnixNano())
 
-    fmt.Println(end - start)
+    if b {
+        fmt.Println(end - start)
+    }
 
 	l := len(a) - 1
 	for i := 0; i < l; i++{
