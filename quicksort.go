@@ -3,14 +3,30 @@ package main
 import "time"
 import "math/rand"
 import "fmt"
+import "runtime"
 
-var threshold int = 10
 
 var arr [100000000]int
 
+func bbsort(a []int) {
+    l := len(a) - 1
+    swapped := true
+    for swapped {
+        swapped = false
+        for x := 0; x < l; x++ {
+            if a[x] > a[x+1] {
+                a[x], a[x+1] = a[x+1], a[x]
+                swapped = true
+            }
+        }
+    }
+}
+
 
 func st_qsort(a []int) []int {
-	if len(a) < 2 { return a }
+	if len(a) < 2 {
+        return a
+    }
 
 	left, right := 0, len(a) - 1
 
@@ -41,7 +57,7 @@ func st_qsort(a []int) []int {
 
 
 func qsort(a []int, ch chan bool) {
-	if len(a) < 3000000 {
+	if len(a) < 100000 {
 		st_qsort(a)
 		ch <- true
 		return
@@ -81,30 +97,38 @@ func qsort(a []int, ch chan bool) {
 
 
 func main() {
+    runtime.GOMAXPROCS(16)
+
 	s1 := rand.NewSource(time.Now().UnixNano())
 	r1 := rand.New(s1)
 	var a []int = arr[0:]
 
+    sum := 0
 
-	for i := range a{
-		a[i] = r1.Intn(100000000)
-	}
+    for loop := 0; loop < 10; loop++ {
 
-	start := int(time.Now().UnixNano())
-    c := make(chan bool)
-	go qsort(a, c)
-    b := <-c
-	end := int(time.Now().UnixNano())
+        for i := range a{
+            a[i] = r1.Intn(100000000)
+        }
 
-    if b {
-        fmt.Println(end - start)
+        start := int(time.Now().UnixNano())
+        c := make(chan bool)
+        go qsort(a, c)
+        b := <-c
+        end := int(time.Now().UnixNano())
+
+        if b {
+            sum += end - start
+        }
+
+        l := len(a) - 1
+        for i := 0; i < l; i++{
+            if a[i] > a[i+1] {
+                fmt.Println("Wrong !")
+                break
+            }
+        }
     }
 
-	l := len(a) - 1
-	for i := 0; i < l; i++{
-		if a[i] > a[i+1] {
-			fmt.Println("Wrong !")
-			break
-		}
-	}
+    fmt.Println(sum/10)
 }
