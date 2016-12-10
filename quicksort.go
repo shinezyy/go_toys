@@ -6,8 +6,10 @@ import "fmt"
 import "sort"
 import "runtime"
 
+const arrayLen = 4000000
+const stThreshold = 100000
 
-var arr [100000000]int
+var arr [arrayLen]int
 
 
 func st_qsort(a []int) []int {
@@ -41,7 +43,7 @@ func st_qsort(a []int) []int {
 
 
 func qsort(a []int, ch chan bool) {
-	if len(a) < 100000 {
+	if len(a) < stThreshold {
         st_qsort(a)
 		ch <- true
 		return
@@ -80,31 +82,42 @@ func main() {
 	s1 := rand.NewSource(time.Now().UnixNano())
 	r1 := rand.New(s1)
 	var a []int = arr[0:]
+    array_copy := make([]int, len(a))
 
-    sum := 0
+    mt_time := 0
+    st_time :=0
 
     numLoop := 1
 
     for loop := 0; loop < numLoop; loop++ {
 
         for i := range a{
-            a[i] = r1.Intn(100000000)
+            a[i] = r1.Intn(arrayLen)
         }
+        copy(array_copy, a)
+
 
         start := int(time.Now().UnixNano())
         c := make(chan bool)
         go qsort(a, c)
-        b := <-c
+        <-c
         end := int(time.Now().UnixNano())
 
-        if b {
-            sum += end - start
+        mt_time += end - start
+        if (!sort.IntsAreSorted(a)) {
+            fmt.Println("Wrong !")
         }
 
-        if (!sort.IntsAreSorted(a)) {
+        start = int(time.Now().UnixNano())
+        st_qsort(array_copy)
+        end = int(time.Now().UnixNano())
+        st_time += end - start
+
+        if (!sort.IntsAreSorted(array_copy)) {
             fmt.Println("Wrong !")
         }
     }
 
-    fmt.Println(float64(sum/numLoop)/1000000000)
+    fmt.Println("Multiple Thread Time:",float64(mt_time/numLoop)/1000000000)
+    fmt.Println("Single Thread Time:",float64(st_time/numLoop)/1000000000)
 }
