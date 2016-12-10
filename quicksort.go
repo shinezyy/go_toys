@@ -9,20 +9,6 @@ import "runtime"
 
 var arr [100000000]int
 
-func bbsort(a []int) {
-    l := len(a) - 1
-    swapped := true
-    for swapped {
-        swapped = false
-        for x := 0; x < l; x++ {
-            if a[x] > a[x+1] {
-                a[x], a[x+1] = a[x+1], a[x]
-                swapped = true
-            }
-        }
-    }
-}
-
 
 func st_qsort(a []int) []int {
 	if len(a) < 2 {
@@ -30,8 +16,6 @@ func st_qsort(a []int) []int {
     }
 
 	left, right := 0, len(a) - 1
-
-	// Pick a pivot
 	pivotIndex := 0
 
 	// Move the pivot to the right
@@ -52,7 +36,6 @@ func st_qsort(a []int) []int {
 	st_qsort(a[:left])
 	st_qsort(a[left + 1:])
 
-
 	return a
 }
 
@@ -65,14 +48,10 @@ func qsort(a []int, ch chan bool) {
 	}
 
 	left, right := 0, len(a) - 1
-
-	// Pick a pivot
 	pivotIndex := 0
 
-	// Move the pivot to the right
 	a[pivotIndex], a[right] = a[right], a[pivotIndex]
 
-	// Pile elements smaller than the pivot on the left
 	for i := range a {
 		if a[i] < a[right] {
 			a[i], a[left] = a[left], a[i]
@@ -80,13 +59,11 @@ func qsort(a []int, ch chan bool) {
 		}
 	}
 
-	// Place the pivot after the last smaller element
 	a[left], a[right] = a[right], a[left]
 
 	ch1 := make(chan bool)
 	ch2 := make(chan bool)
 
-	// Go down the rabbit hole
 	go qsort(a[:left], ch1)
 	go qsort(a[left + 1:], ch2)
 
@@ -106,7 +83,7 @@ func main() {
 
     sum := 0
 
-    numLoop :=2
+    numLoop := 1
 
     for loop := 0; loop < numLoop; loop++ {
 
@@ -129,5 +106,5 @@ func main() {
         }
     }
 
-    fmt.Println(sum/numLoop)
+    fmt.Println(float64(sum/numLoop)/1000000000)
 }
