@@ -6,8 +6,8 @@ import "fmt"
 import "sort"
 import "runtime"
 
-const arrayLen = 4000000
-const stThreshold = 100000
+const arrayLen = 400000
+const stThreshold = 10000
 
 var arr [arrayLen]int
 
@@ -118,6 +118,7 @@ func main() {
         }
     }
 
-    fmt.Println("Multiple Thread Time:",float64(mt_time/numLoop)/1000000000)
-    fmt.Println("Single Thread Time:",float64(st_time/numLoop)/1000000000)
+    fmt.Println("Multiple Thread Time:", float64(mt_time/numLoop)/1000000000)
+    fmt.Println("Single Thread Time:", float64(st_time/numLoop)/1000000000)
+    fmt.Println("Speedup:", float64(st_time)/float64(mt_time))
 }
