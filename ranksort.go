@@ -5,8 +5,9 @@ import "math/rand"
 import "fmt"
 import "sort"
 import "runtime"
+import "sync"
 
-const arrayLen = 300000
+const arrayLen = 3000
 const numSeg = 8
 
 var arr [arrayLen]int
@@ -35,52 +36,42 @@ func st_rankSort(a []int, target []int) []int {
 }
 
 
-func getRank(a []int, target []int, ch chan []int){
-    ranks := make([]int, len(a))
-
-    for i := range(a) {
+func getRank(a []int, L int, R int, ranks []int, wg *sync.WaitGroup){
+    for i := L; i < R; i++ {
         rank := 0
-        for j := range(target) {
-            if a[i] > target[j] {
+        for j := range(a) {
+            if a[i] >a[j] {
                 rank++
             }
-            if a[i] == target[j] && i > j {
+            if a[i] ==a[j] && i > j {
                 rank++
             }
         }
         ranks[i] = rank
     }
-    ch <- ranks
+    wg.Done()
 }
 
 
 func rankSort(a []int) []int {
-    arrays := make([][]int, numSeg)
-    ranks := make([]int, 0)
+    ranks := make([]int, len(a))
     ret := make([]int, len(a))
 
-    segLen := len(arrays)/numSeg
+    segLen := arrayLen/numSeg
     cursor := 0
-    for i := range(arrays) {
-        if i == len(arrays) - 1 {
-            arrays[i] = a[cursor:]
+    var wg sync.WaitGroup
+
+    for i := 0; i < numSeg; i++ {
+        wg.Add(1)
+        if i == numSeg - 1 {
+            go getRank(a, cursor, arrayLen, ranks, &wg)
         } else {
-            arrays[i] = a[cursor: i*segLen]
-            cursor = i*segLen
+            go getRank(a, cursor, (i+1)*segLen, ranks, &wg)
+            cursor = (i+1)*segLen
         }
     }
 
-    var chs [numSeg]chan []int
-    // chs := make([]chan []int, numSeg)
-    for i := range(chs) {
-        chs[i] = make(chan []int)
-        go getRank(arrays[i], a, chs[i])
-        fmt.Println("create go routine", i)
-    }
-
-    for i := range(chs) {
-        ranks = append(ranks, <-chs[i]...)
-    }
+    wg.Wait()
 
     for i := range(a) {
         ret[ranks[i]] = a[i]
