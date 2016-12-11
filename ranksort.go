@@ -7,7 +7,7 @@ import "sort"
 import "runtime"
 import "sync"
 
-const arrayLen = 3000
+const arrayLen = 400000
 const numSeg = 8
 
 var arr [arrayLen]int

@@ -6,8 +6,8 @@ import "fmt"
 import "sort"
 import "runtime"
 
-const arrayLen = 400000
-const stThreshold = 10000
+const arrayLen = 10000000
+const stThreshold = 100000
 
 var arr [arrayLen]int
 

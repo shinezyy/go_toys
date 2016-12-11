@@ -5,9 +5,10 @@ import "math/rand"
 import "fmt"
 import "sort"
 import "runtime"
+import "sync"
 
-const arrayLen = 400000
-const stThreshold = 10000
+const arrayLen = 100000000
+const stThreshold = 100000
 
 var arr [arrayLen]int
 
@@ -69,10 +70,9 @@ func qsort(a []int, ch chan bool) {
 	go qsort(a[:left], ch1)
 	go qsort(a[left + 1:], ch2)
 
-	x := <-ch1
-	y := <-ch2
-
-	ch <- x && y
+	<-ch1
+	<-ch2
+    ch <- true
 }
 
 
