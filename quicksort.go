@@ -43,10 +43,10 @@ func st_qsort(a []int) []int {
 }
 
 
-func qsort(a []int, ch chan bool) {
+func qsort(a []int, wg *sync.WaitGroup) {
 	if len(a) < stThreshold {
         st_qsort(a)
-		ch <- true
+        wg.Done()
 		return
 	}
 
@@ -64,15 +64,14 @@ func qsort(a []int, ch chan bool) {
 
 	a[left], a[right] = a[right], a[left]
 
-	ch1 := make(chan bool)
-	ch2 := make(chan bool)
+    var wg2 sync.WaitGroup
 
-	go qsort(a[:left], ch1)
-	go qsort(a[left + 1:], ch2)
+    wg2.Add(2)
+	go qsort(a[:left], &wg2)
+	go qsort(a[left + 1:], &wg2)
+    wg2.Wait()
 
-	<-ch1
-	<-ch2
-    ch <- true
+    wg.Done()
 }
 
 
@@ -98,9 +97,12 @@ func main() {
 
 
         start := int(time.Now().UnixNano())
-        c := make(chan bool)
-        go qsort(a, c)
-        <-c
+
+        var wg sync.WaitGroup
+        wg.Add(1)
+        go qsort(a, &wg)
+        wg.Wait()
+
         end := int(time.Now().UnixNano())
 
         mt_time += end - start

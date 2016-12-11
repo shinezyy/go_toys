@@ -5,6 +5,7 @@ import "math/rand"
 import "fmt"
 import "sort"
 import "runtime"
+import "sync"
 
 const arrayLen = 10000000
 const stThreshold = 100000
@@ -12,29 +13,28 @@ const stThreshold = 100000
 var arr [arrayLen]int
 
 
-func mergeSort(a []int, ch chan bool) {
+func mergeSort(a []int, wg *sync.WaitGroup) {
     mid := len(a)/2
 
     if len(a) < stThreshold {
         st_mergeSort(a[:mid])
         st_mergeSort(a[mid:])
         merge(a, mid)
-        ch <- true
+        wg.Done()
         return
     }
 
-    ch1 := make(chan bool)
-    ch2 := make(chan bool)
 
-    go mergeSort(a[:mid], ch1)
-    go mergeSort(a[mid:], ch2)
+    var wg2 sync.WaitGroup
+    wg2.Add(2)
+    go mergeSort(a[:mid], &wg2)
+    go mergeSort(a[mid:], &wg2)
+    wg2.Wait()
 
-    x := <-ch1
-    y := <-ch2
 
     merge(a, mid)
 
-    ch <- x && y
+    wg.Done()
 }
 
 
@@ -105,9 +105,12 @@ func main() {
 
 
         start := int(time.Now().UnixNano())
-        c := make(chan bool)
-        go mergeSort(a, c)
-        <-c
+
+        var wg sync.WaitGroup
+        wg.Add(1)
+        go mergeSort(a, &wg)
+        wg.Wait()
+
         end := int(time.Now().UnixNano())
 
         mt_time += end - start
