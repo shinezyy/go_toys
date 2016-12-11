@@ -6,10 +6,11 @@ import "fmt"
 import "sort"
 import "runtime"
 
-const arrayLen = 100000000
-const stThreshold = 100000
+const arrayLen = 400000
+const stThreshold = 10000
 
 var arr [arrayLen]int
+
 
 func mergeSort(a []int, ch chan bool) {
     mid := len(a)/2
@@ -88,8 +89,10 @@ func main() {
 	s1 := rand.NewSource(time.Now().UnixNano())
 	r1 := rand.New(s1)
 	var a []int = arr[0:]
+    array_copy := make([]int, len(a))
 
-    sum := 0
+    mt_time := 0
+    st_time :=0
 
     numLoop := 1
 
@@ -98,24 +101,31 @@ func main() {
         for i := range a{
             a[i] = r1.Intn(arrayLen)
         }
+        copy(array_copy, a)
+
 
         start := int(time.Now().UnixNano())
         c := make(chan bool)
         go mergeSort(a, c)
-        b := <-c
+        <-c
         end := int(time.Now().UnixNano())
 
-        if b {
-            sum += end - start
-        }
-
+        mt_time += end - start
         if (!sort.IntsAreSorted(a)) {
             fmt.Println("Wrong !")
-            for i := 0; i < len(a); i++ {
-                fmt.Println(a[i])
-            }
+        }
+
+        start = int(time.Now().UnixNano())
+        st_mergeSort(array_copy)
+        end = int(time.Now().UnixNano())
+        st_time += end - start
+
+        if (!sort.IntsAreSorted(array_copy)) {
+            fmt.Println("Wrong !")
         }
     }
 
-    fmt.Println(float64(sum/numLoop)/1000000000)
+    fmt.Println("Multiple Thread Time:", float64(mt_time/numLoop)/1000000000)
+    fmt.Println("Single Thread Time:", float64(st_time/numLoop)/1000000000)
+    fmt.Println("Speedup:", float64(st_time)/float64(mt_time))
 }
